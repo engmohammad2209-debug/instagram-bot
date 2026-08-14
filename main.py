@@ -54,7 +54,7 @@ def generate_ai_reply(user_text: str) -> str:
         return "أهلاً بك! جاري تحويل رسالتك إلى المهندس وسنقوم بالرد عليك في أقرب وقت."
 
 def send_instagram_message(recipient_id: str, text_message: str):
-    url = f"https://graph.facebook.com/v19.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
+    url = f"https://graph.instagram.com/v21.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
     payload = {
         "recipient": {"id": recipient_id},
         "message": {"text": text_message}
@@ -62,7 +62,9 @@ def send_instagram_message(recipient_id: str, text_message: str):
     headers = {"Content-Type": "application/json"}
     response = requests.post(url, json=payload, headers=headers)
     if response.status_code != 200:
-        print(f"Failed to send message: {response.text}")
+        print(f"Failed to send message: {response.status_code} - {response.text}")
+    else:
+        print(f"Message sent successfully to {recipient_id}")
 
 @app.get("/webhook")
 async def verify_webhook(request: Request):
@@ -76,6 +78,7 @@ async def verify_webhook(request: Request):
 @app.post("/webhook")
 async def handle_incoming_messages(request: Request):
     data = await request.json()
+    print(f"Received webhook data: {data}")
     try:
         if data.get("object") in ["instagram", "page"]:
             for entry in data.get("entry", []):
